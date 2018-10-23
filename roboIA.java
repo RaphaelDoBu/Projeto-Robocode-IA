@@ -170,24 +170,28 @@ public class RoboIA extends AdvancedRobot
 	
 	public void voltarArea(){
 		if (getX() > (getBattleFieldWidth() - getSentryBorderSize())) {
+			
 			turnLeft(getHeading() + 90);
 			ahead(150);
 		}
 		
 		if (getY() > (getBattleFieldWidth() - getSentryBorderSize())) {
+			
 			turnLeft(getHeading() + 90);
 			ahead(150);
 		}
 		
-		if (getX() < getSentryBorderSize()) {
-			turnRight(getHeading() + 180);
+		if (getX() < (getBattleFieldWidth() - getSentryBorderSize())) {
 			ahead(150);
+			turnRight(getHeading() + 180);
+			
 		}
 		
-		if (getY() < getSentryBorderSize()) {
-			turnRight(getHeading() + 180);
+		if (getY() < (getBattleFieldWidth() - getSentryBorderSize())) {
 			ahead(150);
+			turnRight(getHeading() + 180);
+			
 		}
 	}
 }
-s
+
