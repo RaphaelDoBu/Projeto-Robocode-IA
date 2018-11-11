@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Random;
+import java.awt.Color;
 
 import robocode.AdvancedRobot;
 import robocode.BattleEndedEvent;
@@ -58,7 +59,9 @@ public class RL_Final extends AdvancedRobot {
 	static ArrayList<Integer> winsRate = new ArrayList<Integer>();
 	static int totalcountQ3=0;
 	public void run() {
-	
+		setColors(null, Color.PINK, Color.PINK, new Color(255,165,0,100), new Color(150, 0, 150));
+	    setBodyColor(Color.PINK);
+	    
 		if(roundCountTotal == 0)
 		{
 			NeuralNet.loadData(getDataFile("NN.txt"));
