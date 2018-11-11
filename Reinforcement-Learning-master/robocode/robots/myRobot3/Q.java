@@ -102,11 +102,9 @@ public class Q {
     catch (IOException e)
     {
       System.out.println("IOException trying to open reader of file: " + e);
-      //initialize();
     }
     catch (NumberFormatException e)
     {
-      //initialize();
     }
     finally
     {
@@ -131,9 +129,7 @@ public class Q {
       for (int i = 0; i < States.numStates; i++)
         for (int j = 0; j < States.numActions; j++)
         {
-        	//w.println(" "+i+" "+ j+" "+ table[i][j]+'\n');
         	w.println(table[i][j]);
-          //System.out.println("state: "+i+" Action: "+ j + ": " + table[i][j]+'\n');
         }
 
       if (w.checkError())

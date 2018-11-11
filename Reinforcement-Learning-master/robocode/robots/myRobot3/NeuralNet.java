@@ -65,13 +65,6 @@ public class NeuralNet implements java.io.Serializable{
 		 
 		 table = new double[numStates][numActions];
 		 
-//		 try {
-//			initialize();
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}		//for RL. take this out when only wanting to test NeuralNet
-		 
 	} 
 	 
 
@@ -84,45 +77,17 @@ public class NeuralNet implements java.io.Serializable{
 			NN.initializeWeights();
 			NN.trainingData();
 			NN.start();
-
-			//System.out.println("Error: "+" "+E+" at "+epoch+" epoch");
-			//out.close();
-			
-			//testNN();
-			
-			//Serialize Object
-//			try
-//		      {
-//		         FileOutputStream fileOut =
-//		         new FileOutputStream("NN.ser");
-//		         ObjectOutputStream out = new ObjectOutputStream(fileOut);
-//		         out.writeObject(NN);
-//		         out.close();
-//		         fileOut.close();
-//		         System.out.printf("Serialized data is saved");
-//		      }catch(IOException i)
-//		      {
-//		          i.printStackTrace();
-//		      }
-
-			
 			NN.saveData();			
-			//NN.loadData(new File("NN.txt"));
-			//NN.start();
+		
 		}
 
 	public void start()
 	{
 		int epoch = 0;
 		double error_pattern[] = new double[NUM_PATTERNS];
-		String fileName = "/home/bernard/Música/Reinforcement-Learning-master/robocode/robots/myRobot3/RL.data/data_fromPart2.dat";
+		String fileName = "/home/raphael/Documentos/Projeto-Rocobode-IA/Reinforcement-Learning-master/robocode/robots/myRobot3/RL.data/data_fromPart2.dat";
 		loadDataFromQTable(new File(fileName));
 		
-//	      for (int i = 0; i < States.numStates; i++)
-//		        for (int j = 0; j < States.numActions; j++)
-//		        	System.out.println(table[i][j]);
-//	      
-	      
 	      QtoNNInputVector();		
 		
 		for(int i =0; i<2000; i++)	{
@@ -132,7 +97,6 @@ public class NeuralNet implements java.io.Serializable{
 			
 			for(int j=0; j<NUM_PATTERNS; j++)		{
 				error_pattern[j] = outputFor(training_Input[j]) - training_Output[j];
-				//System.out.println(error_pattern[j] + " = "  + NN.outputFor(training_Input[j]) + " - " + training_Output[j]);
 			}
 			
 			E = 0;
@@ -142,14 +106,7 @@ public class NeuralNet implements java.io.Serializable{
 			E = 0.5 * E;
 			epoch++;
 			
-			//System.out.println("Error: "+" "+E+" at "+epoch+" epoch");
 			System.out.println(E);
-			//out.println(E);
-			
-
-
-			
-				
 			
 		}
 	}
@@ -617,8 +574,6 @@ public class NeuralNet implements java.io.Serializable{
 								inputVectorNN[count][10] = 0;
 							}
 
-							
-							//System.out.println(input_NN[count]);
 							count++;
 							
 						}
@@ -634,7 +589,6 @@ public class NeuralNet implements java.io.Serializable{
 							inputVectorNN[i][j] = 1;
 						else	
 							inputVectorNN[i][j] = -1;
-						//System.out.print(training_Input[i][j]);
 					}
 					
 				}
@@ -750,9 +704,7 @@ public class NeuralNet implements java.io.Serializable{
 							training_Input[i][j] = 1;
 						else	
 							training_Input[i][j] = -1;
-						//System.out.print(training_Input[i][j]);
 					}
-					//System.out.println();
 					
 				}
 				
@@ -762,7 +714,6 @@ public class NeuralNet implements java.io.Serializable{
 					for(int j=0; j<numActions; j++)
 					{
 						training_Output[count] = table[i][j] / 2100.0;
-						//System.out.println(training_Output[count]);
 						count++;
 					}
 				
@@ -1058,11 +1009,9 @@ public class NeuralNet implements java.io.Serializable{
 		    catch (IOException e)
 		    {
 		      System.out.println("IOException trying to open reader of file: " + e);
-		      //initialize();
 		    }
 		    catch (NumberFormatException e)
 		    {
-		      //initialize();
 		    }
 		    finally
 		    {

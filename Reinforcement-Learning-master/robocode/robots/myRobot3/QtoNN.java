@@ -40,7 +40,6 @@ public class QtoNN {
 							else
 								input_NN[count] += "1000";
 							
-							//System.out.println(input_NN[count]);
 							count++;
 						
 						}

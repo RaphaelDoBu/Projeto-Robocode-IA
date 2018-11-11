@@ -5,7 +5,6 @@ public class States {
 	static int numStates =2*3*2;
 	static int numActions = 4;
 	 static final int numEnergy =2;
-	//private static final int numEnergyEnm = 5;
 	 static final int numGunHeat = 2;
 	 static final int numBearing = 4;
 	 static final int numDistance = 3;

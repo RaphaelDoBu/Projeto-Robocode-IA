@@ -1,6 +1,5 @@
 package myRobot3;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,9 +27,6 @@ import robocode.ScannedRobotEvent;
 import robocode.WinEvent;
 import robocode.Event;
 import robocode.util.Utils;
-
-//import robocode.
-
 
 
 public class RL_Final extends AdvancedRobot {
@@ -70,8 +66,6 @@ public class RL_Final extends AdvancedRobot {
 			
 		}
 		
-		//System.out.println(NeuralNet.numActions);
-
 			if(roundCountTotal >= 50)
 			{
 				winsRate.add(winsCount*2);
@@ -104,10 +98,6 @@ public class RL_Final extends AdvancedRobot {
 		while (true) {
 			//doMove();
 			//learn();
-			
-
-
-			
 		}
 	}
 
@@ -171,11 +161,6 @@ public class RL_Final extends AdvancedRobot {
 	
 	public void onScannedRobot(ScannedRobotEvent e) {
 
-//      double absbearing_rad = (getHeading()+e.getBearing())%(360);
-//      //this section sets all the information about our target
-//      double enemyX = getX()+Math.sin(absbearing_rad)*e.getDistance(); //works out the x coordinate of where the target is
-//      double enemyY = getY()+Math.cos(absbearing_rad)*e.getDistance(); //works out the y coordinate of where the target is
-//      scantime = getTime();
       
 		//Update Variables
 		States.update(getEnergy(),		//positive energy is good (my energy is bigger)
@@ -184,11 +169,11 @@ public class RL_Final extends AdvancedRobot {
 					0,
 					0);
 		
-//		if(getEnergy() > 40)
-//		{
-//			if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10)
-//				setFire(Math.min(400 / e.getDistance(), 3));
-//		}
+		if(getEnergy() > 40)
+		{
+			if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10)
+				setFire(Math.min(400 / e.getDistance(), 3));
+		}
 		
 		double firePower = Math.min(400 / e.getDistance(), 3);
 	    //  calculate gun turn toward enemy
@@ -197,7 +182,7 @@ public class RL_Final extends AdvancedRobot {
 	    setTurnGunRight(normalizeBearing(turn));
 	    
 	    //Squaring Off
-	    //setTurnRight(e.getBearing() + 90);
+	    setTurnRight(e.getBearing() + 90);
 
 	    
 	    
@@ -210,11 +195,6 @@ public class RL_Final extends AdvancedRobot {
 
 			state1 = States.getCurrentState();
 			state1NN = States.getCurrentStateNN();
-			
-			
-			//take a random action
-			//action1 = Q.actionOfMaxQ(state1);		//which is basically the first action.
-			//executeAction(action1);
 			
 			Random randomGenerator = new Random();
 			action1 = randomGenerator.nextInt(States.numActions - 1);
@@ -229,34 +209,24 @@ public class RL_Final extends AdvancedRobot {
 			int[] tempStateNN = States.getCurrentStateNN();
 			if(tempState != state2)
 			{
-				
-				//state2 is the CURRENT State. state1 is the previous
-				
+								
 				//Q LEARNING
 				state2 = tempState;
 				state2NN = tempStateNN;
-				//Q.QLearning(state1, action1, state2, reward);									//How can we update NN
 				NeuralNet.trainNN(state1NN, action1, state2NN, reward);
-				//store current state as state1
 				state1 = state2;
 				state1NN = state2NN;
-				//reset reward
 				reward = 0;
 				
 				
 				//take action
 				if(Math.random() > epsilon )
 				{
-					//action1 = Q.actionOfMaxQ(state1);											//Get it from NN
-					
-					//int tempStateNN[] = States.getCurrentStateNN();				//returns vector of Energy, Distance, and GunHeat
 					action1 = NeuralNet.actionOfMaxQNN(tempStateNN);
 					
-					//executeAction(action1, firePower);
 				}else{
 				    Random randomGenerator = new Random();
 				    action1 = randomGenerator.nextInt(States.numActions - 1);
-				    //executeAction(action1, firePower);	
 				}
 			}
 			
@@ -266,102 +236,11 @@ public class RL_Final extends AdvancedRobot {
 			executeAction(action1, firePower);
 
 			}
-	    
-	    
-	    
-//	    //SARSA
-//	    if(run==0)
-//		{
-//			//record initial state as state1
-//			//Update Variables
-//
-//			state3 = States.getCurrentState();
-//			
-//			
-//			//take a random action
-//			//action1 = Q.actionOfMaxQ(state1);		//which is basically the first action.
-//			//executeAction(action1);
-//			
-//			Random randomGenerator = new Random();
-//			action3 = randomGenerator.nextInt(States.numActions - 1);
-//			executeAction(action3, firePower);
-//			
-//			run = 1;
-//			
-//		}else if(run==1){
-//			
-//			reward2 = reward;
-//			
-//			state2 = state3;
-//			action2 = action3;
-//			state3 = States.getCurrentState();
-//			
-//			
-//			//take a random action
-//			//action1 = Q.actionOfMaxQ(state1);		//which is basically the first action.
-//			//executeAction(action1);
-//			
-//			Random randomGenerator = new Random();
-//			action3 = randomGenerator.nextInt(States.numActions - 1);
-//			executeAction(action3, firePower);
-//			
-//			
-//			
-//			run = 2;
-//		}else{
-//			
-//			
-//
-//			
-//			
-//			int tempState = States.getCurrentState();
-//			if(tempState != state3)
-//			{
-//				
-//				reward1 = reward2;
-//				reward2 = reward;
-//				
-//				state1 = state2;
-//				action1 = action2;
-//				state2 = state3;
-//				action2 = action3;
-//				
-//				state3 = tempState;
-//				Q.SARSA(state1, action1, state2, action2, reward1);
-//
-//				//reset reward
-//				reward = 0;
-//				
-//				
-//				//take action
-//				if(Math.random() > epsilon )
-//				{
-//					action3 = Q.actionOfMaxQ(state1);		
-//					//executeAction(action1, firePower);
-//				}else{
-//				    Random randomGenerator = new Random();
-//				    action3 = randomGenerator.nextInt(States.numActions - 1);
-//				    //executeAction(action1, firePower);	
-//				}
-//			}
-//			
-//			if(action3 == 1 && getGunHeat() != 0)
-//				reward += -3;
-//		
-//			executeAction(action3, firePower);
-//
-//			}
-			
-		
-		
+	   
 		setTurnRadarLeftRadians(getRadarTurnRemainingRadians());
 	}
 
 
-	//public void onHitByBullet(HitByBulletEvent e) {
-	//	turnLeft(90 - e.getBearing());
-	//}
-	
 	public void doMove() {
 
 		// always square off against our enemy
@@ -373,10 +252,6 @@ public class RL_Final extends AdvancedRobot {
 			setAhead(100 * moveDirection);
 		}
 		
-		
-		//setAhead(100 * moveDirection);
-		
-//		setAhead(100);
 	}
 	
 	public void doMoveOpposite() {
@@ -406,22 +281,13 @@ public class RL_Final extends AdvancedRobot {
 	  public void onWin(WinEvent event)
 	  {
 		reward += 10;
-		//learn();
-		//saveData();
 		
 		winsCount++;
-//		time[roundCount++] = getTime();
-//		saveDataTime();
 	  }
 	
 	  public void onDeath(DeathEvent event)
 	  {
 		reward += -10;
-		//learn();
-		//saveData();
-		
-//		time[roundCount++] = getTime();
-//		saveDataTime();
 		
 	  }
 		
@@ -429,15 +295,12 @@ public class RL_Final extends AdvancedRobot {
 	  {
 
 	     double change = e.getBullet().getPower() * 3 ;
-	      //out.println("Bullet Hit: " + change);
 	     reward = reward + (int)change;;
-	     //learn();
 	  }
 	
 	  public void onBulletHitBullet(BulletHitBulletEvent e) 
 	  {
 	    reward += -3;  
-	    //learn();
 	   }
 	  
 	  public void onHitRobot(HitRobotEvent e)
@@ -445,16 +308,13 @@ public class RL_Final extends AdvancedRobot {
 	    reward += -3;
 	    
 	    moveDirection *= -1; 
-	    //learn();
 	  }
 	
 	  public void onBulletMissed(BulletMissedEvent e)
 	  {
 	    double change = -e.getBullet().getPower();
-	    //out.println("Bullet Missed: " + change);
 	    reward += (int)change;
 	    
-	    //learn();
 	  }
 	
 	  public void onHitByBullet(HitByBulletEvent e)
@@ -465,7 +325,6 @@ public class RL_Final extends AdvancedRobot {
 	     
 	       reward += (int)change;
 	       
-	       //learn();
 
 	  }
 	  
@@ -473,21 +332,8 @@ public class RL_Final extends AdvancedRobot {
 	  {
 	       reward += -3;
 	       moveDirection *= -1; 
-			//learn();
 	  }
 	  
-	  
-	
-
-//	  private void learn()
-//	  {
-//			state2 = States.getCurrentState();
-//			Q.QLearning(state1, action1, state2, reward);
-//			//store current state as state1
-//			state1 = state2;
-//			//reset reward
-//			reward = 0;
-//	  }
 	  public void loadData()
 	  {
 		  
@@ -590,7 +436,6 @@ public class RL_Final extends AdvancedRobot {
 	  public void onBattleEnded(BattleEndedEvent e) {
 	       saveData();
 	       saveWinRate();
-//	       saveDataTurns();
 	   }
 
 	  
