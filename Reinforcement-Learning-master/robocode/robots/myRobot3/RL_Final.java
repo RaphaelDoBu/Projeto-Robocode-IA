@@ -205,9 +205,6 @@ public class RL_Final extends AdvancedRobot {
 			
 			firstrun = false;
 		}else{
-			//learn();
-			
-			
 			int tempState = States.getCurrentState();
 			int[] tempStateNN = States.getCurrentStateNN();
 			if(tempState != state2)
