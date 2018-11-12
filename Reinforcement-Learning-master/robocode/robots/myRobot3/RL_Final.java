@@ -1,5 +1,6 @@
 package myRobot3;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,7 +9,6 @@ import java.io.ObjectInputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Random;
-import java.awt.Color;
 
 import robocode.AdvancedRobot;
 import robocode.BattleEndedEvent;
@@ -28,6 +28,10 @@ import robocode.ScannedRobotEvent;
 import robocode.WinEvent;
 import robocode.Event;
 import robocode.util.Utils;
+import java.awt.Color;
+
+//import robocode.
+
 
 
 public class RL_Final extends AdvancedRobot {
@@ -59,9 +63,9 @@ public class RL_Final extends AdvancedRobot {
 	static ArrayList<Integer> winsRate = new ArrayList<Integer>();
 	static int totalcountQ3=0;
 	public void run() {
-		setColors(null, Color.PINK, Color.PINK, new Color(255,165,0,100), new Color(150, 0, 150));
-	    setBodyColor(Color.PINK);
-	    
+		  setBodyColor(new java.awt.Color(204,105,50));
+		  setGunColor(new java.awt.Color(150,70,100));
+		  setRadarColor(new java.awt.Color(75,15,14));
 		if(roundCountTotal == 0)
 		{
 			NeuralNet.loadData(getDataFile("NN.txt"));
@@ -69,27 +73,13 @@ public class RL_Final extends AdvancedRobot {
 			
 		}
 		
-			if(roundCountTotal >= 50)
-			{
+			if(roundCountTotal >= 50){
 				winsRate.add(winsCount*2);
 				roundCountTotal = 0;
 				winsCount = 0;
 			}
-			roundCountTotal++;
+		roundCountTotal++;
 
-			
-			
-//			epsilon = 0.8;
-//			
-//		totalcountQ3++;
-//		if(totalcountQ3>999)
-//			epsilon = 0;
-			
-//		epsilon = 0;
-
-
-//		
-//		epsilon = 0;
 //		loadData();	
 
 		epsilon = 0.1;
@@ -100,12 +90,11 @@ public class RL_Final extends AdvancedRobot {
 	    
 		while (true) {
 			//doMove();
-			//learn();
+			//learn();	
 		}
 	}
 
-	private void executeAction(int action, double variable) 
-	{
+	private void executeAction(int action, double variable)	{
 		switch(action){
 			case 0:	 attackFace();
 				break;
@@ -120,8 +109,7 @@ public class RL_Final extends AdvancedRobot {
 	}
 
 
-	public void avoid2()
-	{
+	public void avoid2(){
 		// switch directions if we've stopped
 		if (getVelocity() == 0)
 			moveDirection *= -1;
@@ -163,41 +151,47 @@ public class RL_Final extends AdvancedRobot {
 	}
 	
 	public void onScannedRobot(ScannedRobotEvent e) {
-
+		double firePower = Math.min(600 / e.getDistance(), 3);
+//      double absbearing_rad = (getHeading()+e.getBearing())%(360);
+//      //this section sets all the information about our target
+//      double enemyX = getX()+Math.sin(absbearing_rad)*e.getDistance(); //works out the x coordinate of where the target is
+//      double enemyY = getY()+Math.cos(absbearing_rad)*e.getDistance(); //works out the y coordinate of where the target is
+//      scantime = getTime();
       
 		//Update Variables
 		States.update(getEnergy(),		//positive energy is good (my energy is bigger)
-					e.getDistance(),
-					getGunHeat(),
-					0,
-					0);
+						e.getDistance(), getGunHeat(), 0, 0);
 		
-		if(getEnergy() > 40)
+		
+		//-------------- MODIFICADO ----------------------
+		// A energia estava original com 40, mas é um pouco limitado e arriscado para o robo
+		// com isso limitamos entre 20 a 80 para se esquivar o quanto antes.
+		if(getEnergy() > 20 && getEnergy() < 80)
 		{
-			if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10)
-				setFire(Math.min(400 / e.getDistance(), 3));
+			if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 20)
+				// Força do tiro do robo
+				setFire(firePower);
 		}
 		
-		double firePower = Math.min(400 / e.getDistance(), 3);
 	    //  calculate gun turn toward enemy
 	    double turn = getHeading() - getGunHeading() + e.getBearing();
 	    // normalize the turn to take the shortest path there
-	    setTurnGunRight(normalizeBearing(turn));
+	    setTurnGunRight(normalizeBearing(turn));	    
 	    
 	    //Squaring Off
-	    setTurnRight(e.getBearing() + 90);
-
-	    
-	    
+	    //setTurnRight(e.getBearing() + 90);	    
 	    
 	    //QLEARNING
-	    if(firstrun)
-		{
+	    if(firstrun){
 			//record initial state as state1
 			//Update Variables
 
 			state1 = States.getCurrentState();
-			state1NN = States.getCurrentStateNN();
+			state1NN = States.getCurrentStateNN();			
+			
+			//take a random action
+			//action1 = Q.actionOfMaxQ(state1);		//which is basically the first action.
+			//executeAction(action1);
 			
 			Random randomGenerator = new Random();
 			action1 = randomGenerator.nextInt(States.numActions - 1);
@@ -205,28 +199,38 @@ public class RL_Final extends AdvancedRobot {
 			
 			firstrun = false;
 		}else{
+			//learn();		
+			
 			int tempState = States.getCurrentState();
 			int[] tempStateNN = States.getCurrentStateNN();
-			if(tempState != state2)
-			{
-								
+			if(tempState != state2)	{
+				
+				//state2 is the CURRENT State. state1 is the previous
+				
 				//Q LEARNING
 				state2 = tempState;
 				state2NN = tempStateNN;
+				//Q.QLearning(state1, action1, state2, reward); //How can we update NN
 				NeuralNet.trainNN(state1NN, action1, state2NN, reward);
+				//store current state as state1
 				state1 = state2;
 				state1NN = state2NN;
+				//reset reward
 				reward = 0;
 				
 				
 				//take action
-				if(Math.random() > epsilon )
-				{
+				if(Math.random() > epsilon ){
+					//action1 = Q.actionOfMaxQ(state1);	//Get it from NN
+					
+					//int tempStateNN[] = States.getCurrentStateNN();	//returns vector of Energy, Distance, and GunHeat
 					action1 = NeuralNet.actionOfMaxQNN(tempStateNN);
 					
+					//executeAction(action1, firePower);
 				}else{
 				    Random randomGenerator = new Random();
 				    action1 = randomGenerator.nextInt(States.numActions - 1);
+				    //executeAction(action1, firePower);	
 				}
 			}
 			
@@ -235,12 +239,16 @@ public class RL_Final extends AdvancedRobot {
 		
 			executeAction(action1, firePower);
 
-			}
-	   
+			}		
+		
 		setTurnRadarLeftRadians(getRadarTurnRemainingRadians());
 	}
 
 
+	//public void onHitByBullet(HitByBulletEvent e) {
+	//	turnLeft(90 - e.getBearing());
+	//}
+	
 	public void doMove() {
 
 		// always square off against our enemy
@@ -252,22 +260,16 @@ public class RL_Final extends AdvancedRobot {
 			setAhead(100 * moveDirection);
 		}
 		
+		
+		setAhead(100 * moveDirection);
+		
+//		setAhead(100);
 	}
 	
 	public void doMoveOpposite() {
 
 		// always square off against our enemy
-		setTurnRight(States.bearing + 90);
-
-//		// strafe by changing direction every 20 ticks
-//		if (getTime() % 20 == 0) {
-//			moveDirection *= -1;
-//			setAhead(150 * moveDirection);
-//		}
-		
-		
-		//setAhead(100 * moveDirection);
-		
+		setTurnRight(States.bearing + 90);		
 		setAhead(-100);
 	}
 	
@@ -281,13 +283,22 @@ public class RL_Final extends AdvancedRobot {
 	  public void onWin(WinEvent event)
 	  {
 		reward += 10;
+		//learn();
+		//saveData();
 		
 		winsCount++;
+//		time[roundCount++] = getTime();
+//		saveDataTime();
 	  }
 	
 	  public void onDeath(DeathEvent event)
 	  {
 		reward += -10;
+		//learn();
+		//saveData();
+		
+//		time[roundCount++] = getTime();
+//		saveDataTime();
 		
 	  }
 		
@@ -296,18 +307,20 @@ public class RL_Final extends AdvancedRobot {
 
 	     double change = e.getBullet().getPower() * 3 ;
 	     reward = reward + (int)change;;
+	     //learn();
 	  }
 	
 	  public void onBulletHitBullet(BulletHitBulletEvent e) 
 	  {
 	    reward += -3;  
+	    //learn();
 	   }
 	  
 	  public void onHitRobot(HitRobotEvent e)
 	  {
-	    reward += -3;
-	    
+	    reward += -3;	    
 	    moveDirection *= -1; 
+	    //learn();
 	  }
 	
 	  public void onBulletMissed(BulletMissedEvent e)
@@ -315,6 +328,7 @@ public class RL_Final extends AdvancedRobot {
 	    double change = -e.getBullet().getPower();
 	    reward += (int)change;
 	    
+	    //learn();
 	  }
 	
 	  public void onHitByBullet(HitByBulletEvent e)
@@ -322,9 +336,9 @@ public class RL_Final extends AdvancedRobot {
 
 	      double power = e.getBullet().getPower();
 	      double change = -3 * power;
-	     
-	       reward += (int)change;
+	      reward += (int)change;
 	       
+	       //learn();
 
 	  }
 	  
@@ -332,37 +346,42 @@ public class RL_Final extends AdvancedRobot {
 	  {
 	       reward += -3;
 	       moveDirection *= -1; 
+			//learn();
 	  }
 	  
-	  public void loadData()
-	  {
+	  
+	
+
+	  private void learn() {
+			state2 = States.getCurrentState();
+			Q.QLearning(state1, action1, state2, reward);
+			//store current state as state1
+		    state1 = state2;
+			//reset reward
+			reward = 0;
+	  }
+	  
+	  public void loadData() {
 		  
-	    try
-	    {
+	    try {
 	      Q.loadData(getDataFile("data.dat"));
 	    }
-	    catch (Exception e)
-	    {
+	    catch (Exception e) {
 	    }
 	  }
 	
-	  public void saveData()
-	  {
-	    try
-	    {
+	  public void saveData() {
+	    try {
 	      Q.saveData(getDataFile("data.dat"));
 	    }
-	    catch (Exception e)
-	    {
+	    catch (Exception e) {
 	      out.println("Exception trying to write: " + e);
 	    }
 	  }
 	  
-	  public void saveDataTurns()
-	  {
+	  public void saveDataTurns() {
 	    PrintStream w = null;
-	    try
-	    {
+	    try {
 	      w = new PrintStream(new RobocodeFileOutputStream(getDataFile("turns.dat")));
 	      for(int i=0; i<roundCount; i++)
 	    	  w.println(turnsReached[i]);
@@ -373,48 +392,37 @@ public class RL_Final extends AdvancedRobot {
 	        System.out.println("Could not save the data to file!");
 	      w.close();
 	    }
-	    catch (IOException e)
-	    {
+	    catch (IOException e) {
 	      System.out.println("IOException trying to write to file: " + e);
 	    }
-	    finally
-	    {
-	      try
-	      {
+	    finally {
+	      try  {
 	        if (w != null)
 	          w.close();
 	      }
-	      catch (Exception e)
-	      {
+	      catch (Exception e) {
 	        System.out.println("Exception trying to close witer of movement file: " + e);
 	      }
 	    }
 	  }
 
 	  
-	  public void saveWinRate()
-	  {
+	  public void saveWinRate() {
 	    PrintStream w = null;
-	    try
-	    {
+	    try {
 	      w = new PrintStream(new RobocodeFileOutputStream(getDataFile("winRate.dat")));
 	      for(int i=0; i<winsRate.size(); i++)
 	    	  w.println(winsRate.get(i));
-
-
 
 	      if (w.checkError())
 	        System.out.println("Could not save the data to file!");
 	      w.close();
 	    }
-	    catch (IOException e)
-	    {
+	    catch (IOException e)  {
 	      System.out.println("IOException trying to write to file: " + e);
 	    }
-	    finally
-	    {
-	      try
-	      {
+	    finally {
+	      try {
 	        if (w != null)
 	          w.close();
 	      }
@@ -436,10 +444,10 @@ public class RL_Final extends AdvancedRobot {
 	  public void onBattleEnded(BattleEndedEvent e) {
 	       saveData();
 	       saveWinRate();
+//	       saveDataTurns();
 	   }
 
 	  
 	  
 	  
 }												
-

@@ -32,22 +32,21 @@ public class NeuralNet implements java.io.Serializable{
 	
 	 int numStates = 12;
 	 int numActions = 4;
-	  final int numEnergy =2;
-	  final int numGunHeat = 2;
-	  final int numDistance = 3;
+	 final int numEnergy =2;
+	 final int numGunHeat = 2;
+	 final int numDistance = 3;
 	 
 	//Weights
 	private  double[][] weight_Input2Hidden = new double[NUM_HIDDEN][NUM_INPUTS];
-	private  double[] weight_Hidden2Output = new double[NUM_HIDDEN + 1]; //we need a 2D array if outputs are more than 1.
+	private  double[] weight_Hidden2Output = new double[NUM_HIDDEN + 1]; 
 	private  double[][] delta_weight_Input2Hidden = new double[NUM_HIDDEN][NUM_INPUTS];
-	private  double[] delta_weight_Hidden2Output = new double[NUM_HIDDEN + 1]; //we need a 2D array if outputs are more than 1.
+	private  double[] delta_weight_Hidden2Output = new double[NUM_HIDDEN + 1]; 
 	private  final double WEIGHT_MIN 	= -50;
 	private  final double WEIGHT_MAX 	=  -10;
 	//Training
 	private  final static int 	NUM_PATTERNS 	= 48;
 	private  int[][] 	training_Input 		= new int[NUM_PATTERNS][NUM_INPUTS];
-	private  double[] 	training_Output 	= new double[NUM_PATTERNS]; //Needs to be 2D if outputs are more than 1.
-	
+	private  double[] 	training_Output 	= new double[NUM_PATTERNS]; 	
 	//Variables
 	private  double[] error = new double[NUM_HIDDEN + 1];
 	private  double[] weighted_sum_s = new double[NUM_HIDDEN + 1];
@@ -65,30 +64,57 @@ public class NeuralNet implements java.io.Serializable{
 		 
 		 table = new double[numStates][numActions];
 		 
+//		 try {
+//			initialize();
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}				 
 	} 
-	 
-
-		
+	 	
 		public static void main(String[] args) throws FileNotFoundException {
-			// TODO Auto-generated method stub
-
-			
+						
 			NeuralNet NN = new NeuralNet();
 			NN.initializeWeights();
 			NN.trainingData();
 			NN.start();
+
+			//out.close();			
+			//testNN();
+			
+			//Serialize Object
+//			try
+//		      {
+//		         FileOutputStream fileOut = new FileOutputStream("NN.ser");
+//		         ObjectOutputStream out = new ObjectOutputStream(fileOut);
+//		         out.writeObject(NN);
+//		         out.close();
+//		         fileOut.close();
+//		         System.out.printf("Serialized data is saved");
+//		      }catch(IOException i)
+//		      {
+//		          i.printStackTrace();
+//		      }
+
+			
 			NN.saveData();			
-		
+			//NN.loadData(new File("NN.txt"));
+			//NN.start();
 		}
 
 	public void start()
 	{
 		int epoch = 0;
 		double error_pattern[] = new double[NUM_PATTERNS];
-		String fileName = "/home/raphael/Documentos/Projeto-Rocobode-IA/Reinforcement-Learning-master/robocode/robots/myRobot3/RL.data/data_fromPart2.dat";
+		String fileName = "/home/bernard/Música/Reinforcement-Learning-master/robocode/robots/myRobot3/RL.data/data_fromPart2.dat";
 		loadDataFromQTable(new File(fileName));
 		
-	      QtoNNInputVector();		
+//	      for (int i = 0; i < States.numStates; i++)
+//		        for (int j = 0; j < States.numActions; j++)
+//		        	System.out.println(table[i][j]);
+//	      
+	      
+	    QtoNNInputVector();		
 		
 		for(int i =0; i<2000; i++)	{
 			for(int j=0; j<NUM_PATTERNS; j++)	{
@@ -97,6 +123,7 @@ public class NeuralNet implements java.io.Serializable{
 			
 			for(int j=0; j<NUM_PATTERNS; j++)		{
 				error_pattern[j] = outputFor(training_Input[j]) - training_Output[j];
+				//System.out.println(error_pattern[j] + " = "  + NN.outputFor(training_Input[j]) + " - " + training_Output[j]);
 			}
 			
 			E = 0;
@@ -107,6 +134,7 @@ public class NeuralNet implements java.io.Serializable{
 			epoch++;
 			
 			System.out.println(E);
+			//out.println(E);
 			
 		}
 	}
@@ -123,8 +151,7 @@ public class NeuralNet implements java.io.Serializable{
 				
 			}
 			weighted_sum_s[i] = temp;
-			//System.out.println(temp);
-			activation_u[i]		= sigmoid(weighted_sum_s[i]);
+			activation_u[i]	= sigmoid(weighted_sum_s[i]);
 		}
 			
 		total_weighted_sum_s = 0;
@@ -183,8 +210,6 @@ public class NeuralNet implements java.io.Serializable{
 				error[i] = 0.5*(1-pow(activation_u[i],2))*total_error*weight_Hidden2Output[i];
 			}
 		}
-
-		
 		
 		//Update Weight
 		for(int i=0; i<NUM_HIDDEN + 1; i++)
@@ -199,14 +224,11 @@ public class NeuralNet implements java.io.Serializable{
 				weight_Input2Hidden[i][j] 		+= MOMENTUM*delta_weight_Input2Hidden[i][j] + (LEARNING_RATE*error[i]*X[j]);
 				delta_weight_Input2Hidden[i][j] = LEARNING_RATE*error[i]*X[j] + (MOMENTUM*delta_weight_Input2Hidden[i][j]);
 			}
-		}
-		
-		
+		}		
 		
 		return 0;
 	}
 	
-	//public double trainNN(double[] X, double argValue) {
 	public double trainNN(int[] state1, int action1, int[] state2, int reward) {
 		
 		// Backpropagation
@@ -336,11 +358,10 @@ public class NeuralNet implements java.io.Serializable{
 		double Q1		= outputFor(inputState1Action1NN);
 		
 		//double maxQ 	= maxQ(state2);
-		double maxQ 	= maxQNN(inputState2NN);
-		
+		double maxQ 	= maxQNN(inputState2NN);		
 		double updatedQ = Q1 + 0.04 * (reward + Q.GAMMA * maxQ - Q1);
 		
-		//System.out.println(Q1 + " - " + maxQ  + " - " + updatedQ);
+	
 		//setQ(state1, action1, updatedQ);
 		double argValue = updatedQ;
 		
@@ -401,15 +422,9 @@ public class NeuralNet implements java.io.Serializable{
 				weight_Input2Hidden[i][j] 		+= MOMENTUM*delta_weight_Input2Hidden[i][j] + (LEARNING_RATE*error[i]*inputState1Action1NN[j]);
 				delta_weight_Input2Hidden[i][j] = LEARNING_RATE*error[i]*inputState1Action1NN[j] + (MOMENTUM*delta_weight_Input2Hidden[i][j]);
 			}
-		}
-		
-		
-		
+		}		
 		return 0;
 	}
-
-
-
 	
 	public  double sigmoid(double x) {
 		// TODO Auto-generated method stub
@@ -449,14 +464,12 @@ public class NeuralNet implements java.io.Serializable{
 
 	public void trainingData()
     {
-		activation_u[NUM_HIDDEN] = 1;
-		
+		activation_u[NUM_HIDDEN] = 1;		
 
     }
 	
 	
-	  public  void loadDataFromQTable(File fileName)
-	  {
+	  public  void loadDataFromQTable(File fileName)  {
 	    BufferedReader r = null;
 	    try
 	    {
@@ -476,8 +489,7 @@ public class NeuralNet implements java.io.Serializable{
 	    {
 	      //initialize();
 	    }
-	    finally
-	    {
+	    finally {
 	      try
 	      {
 	        if (r != null)
@@ -492,123 +504,9 @@ public class NeuralNet implements java.io.Serializable{
 
 	  
 	  
-	  private  void testNN()
-	  {
+	  private  void testNN()  {
 			
 			int inputVectorNN[][] = new int[48][11];
-			
-			int count = 0;
-			for (int i=0; i < numEnergy; i++)		//energy
-				for (int m=0; m < numDistance; m++)	//distance
-					for (int k=0; k < numGunHeat; k++)	//gunheat
-						for(int z=0; z<numActions; z++)	//actions
-						{
-							if(i==0)
-							{
-								inputVectorNN[count][0] = 0;
-								inputVectorNN[count][1] = 1;
-							}else{
-								inputVectorNN[count][0] = 1;
-								inputVectorNN[count][1] = 0;
-							}
-							
-							if(m==0)
-							{
-								inputVectorNN[count][2] = 0;
-								inputVectorNN[count][3] = 0;
-								inputVectorNN[count][4] = 1;
-							}
-							else if(m==1)
-							{
-								inputVectorNN[count][2] = 0;
-								inputVectorNN[count][3] = 1;
-								inputVectorNN[count][4] = 0;
-							}
-							else
-							{
-								inputVectorNN[count][2] = 1;
-								inputVectorNN[count][3] = 0;
-								inputVectorNN[count][4] = 0;
-							}	
-							
-							
-							
-							if(k==0)
-							{
-								inputVectorNN[count][5] = 0;
-								inputVectorNN[count][6] = 1;
-							}
-							else
-							{
-								inputVectorNN[count][5] = 1;
-								inputVectorNN[count][6] = 0;
-							}
-							
-							
-							if(z==0)
-							{
-								inputVectorNN[count][7] = 0;
-								inputVectorNN[count][8] = 0;
-								inputVectorNN[count][9] = 0;
-								inputVectorNN[count][10] = 1;
-							}
-							else if(z==1)
-							{
-								inputVectorNN[count][7] = 0;
-								inputVectorNN[count][8] = 0;
-								inputVectorNN[count][9] = 1;
-								inputVectorNN[count][10] = 0;
-							}
-							else if(z==2)
-							{
-								inputVectorNN[count][7] = 0;
-								inputVectorNN[count][8] = 1;
-								inputVectorNN[count][9] = 0;
-								inputVectorNN[count][10] = 0;
-							}
-							else
-							{
-								inputVectorNN[count][7] = 1;
-								inputVectorNN[count][8] = 0;
-								inputVectorNN[count][9] = 0;
-								inputVectorNN[count][10] = 0;
-							}
-
-							count++;
-							
-						}
-				
-			
-			
-				//Populating the trainingInput
-				for(int i =0; i<48; i++)
-				{
-					for(int j=0; j<NUM_INPUTS; j++)
-					{
-						if(inputVectorNN[i][j] == 1)
-							inputVectorNN[i][j] = 1;
-						else	
-							inputVectorNN[i][j] = -1;
-					}
-					
-				}
-
-				
-				//Print all Outputs for all States*Action (48)
-				for(int i =0; i<48; i++)
-				{
-						System.out.println(outputFor(inputVectorNN[i]) * 2100.0);
-					
-				}
-				
-
-	  }
-	  
-	  
-	  private  void QtoNNInputVector()
-	  {
-			
-			double inputVectorNN[][] = new double[48][11];
 			
 			int count = 0;
 			for (int i=0; i < numEnergy; i++)		//energy
@@ -696,14 +594,126 @@ public class NeuralNet implements java.io.Serializable{
 			
 			
 				//Populating the trainingInput
+				for(int i =0; i<48; i++){
+					for(int j=0; j<NUM_INPUTS; j++)
+					{
+						if(inputVectorNN[i][j] == 1)
+							inputVectorNN[i][j] = 1;
+						else	
+							inputVectorNN[i][j] = -1;
+						//System.out.print(training_Input[i][j]);
+					}
+					
+				}
+
+				
+				//Print all Outputs for all States*Action (48)
 				for(int i =0; i<48; i++)
 				{
+						System.out.println(outputFor(inputVectorNN[i]) * 2100.0);
+					
+				}
+				
+
+	  }
+	  
+	  
+	  private  void QtoNNInputVector()  {
+			
+			double inputVectorNN[][] = new double[48][11];
+			
+			int count = 0;
+			for (int i=0; i < numEnergy; i++)		//energy
+				for (int m=0; m < numDistance; m++)	//distance
+					for (int k=0; k < numGunHeat; k++)	//gunheat
+						for(int z=0; z<numActions; z++)	//actions
+						{
+							if(i==0)
+							{
+								inputVectorNN[count][0] = 0;
+								inputVectorNN[count][1] = 1;
+							}else{
+								inputVectorNN[count][0] = 1;
+								inputVectorNN[count][1] = 0;
+							}
+							
+							if(m==0)
+							{
+								inputVectorNN[count][2] = 0;
+								inputVectorNN[count][3] = 0;
+								inputVectorNN[count][4] = 1;
+							}
+							else if(m==1)
+							{
+								inputVectorNN[count][2] = 0;
+								inputVectorNN[count][3] = 1;
+								inputVectorNN[count][4] = 0;
+							}
+							else
+							{
+								inputVectorNN[count][2] = 1;
+								inputVectorNN[count][3] = 0;
+								inputVectorNN[count][4] = 0;
+							}	
+							
+							
+							
+							if(k==0)
+							{
+								inputVectorNN[count][5] = 0;
+								inputVectorNN[count][6] = 1;
+							}
+							else
+							{
+								inputVectorNN[count][5] = 1;
+								inputVectorNN[count][6] = 0;
+							}
+							
+							
+							if(z==0)
+							{
+								inputVectorNN[count][7] = 0;
+								inputVectorNN[count][8] = 0;
+								inputVectorNN[count][9] = 0;
+								inputVectorNN[count][10] = 1;
+							}
+							else if(z==1)
+							{
+								inputVectorNN[count][7] = 0;
+								inputVectorNN[count][8] = 0;
+								inputVectorNN[count][9] = 1;
+								inputVectorNN[count][10] = 0;
+							}
+							else if(z==2)
+							{
+								inputVectorNN[count][7] = 0;
+								inputVectorNN[count][8] = 1;
+								inputVectorNN[count][9] = 0;
+								inputVectorNN[count][10] = 0;
+							}
+							else
+							{
+								inputVectorNN[count][7] = 1;
+								inputVectorNN[count][8] = 0;
+								inputVectorNN[count][9] = 0;
+								inputVectorNN[count][10] = 0;
+							}
+
+							
+							//System.out.println(input_NN[count]);
+							count++;
+							
+						}		
+			
+				//Populating the trainingInput
+				for(int i =0; i<48; i++){
 					for(int j=0; j<NUM_INPUTS; j++)
 					{
 						if(inputVectorNN[i][j] == 1)
 							training_Input[i][j] = 1;
 						else	
 							training_Input[i][j] = -1;
+						//System.out.print(training_Input[i][j]);
 					}
 					
 				}
@@ -714,13 +724,11 @@ public class NeuralNet implements java.io.Serializable{
 					for(int j=0; j<numActions; j++)
 					{
 						training_Output[count] = table[i][j] / 2100.0;
+						//System.out.println(training_Output[count]);
 						count++;
 					}
 				
 				//training_Input
-				
-				
-
 	  }
 
 		double maxQNN(int[] state)
@@ -775,29 +783,25 @@ public class NeuralNet implements java.io.Serializable{
 			{
 				
 				
-				if(i==0)
-				{
+				if(i==0){
 					inputVectorNN[7] = 0;
 					inputVectorNN[8] = 0;
 					inputVectorNN[9] = 0;
 					inputVectorNN[10] = 1;
 				}
-				else if(i==1)
-				{
+				else if(i==1){
 					inputVectorNN[7] = 0;
 					inputVectorNN[8] = 0;
 					inputVectorNN[9] = 1;
 					inputVectorNN[10] = 0;
 				}
-				else if(i==2)
-				{
+				else if(i==2){
 					inputVectorNN[7] = 0;
 					inputVectorNN[8] = 1;
 					inputVectorNN[9] = 0;
 					inputVectorNN[10] = 0;
 				}
-				else
-				{
+				else{
 					inputVectorNN[7] = 1;
 					inputVectorNN[8] = 0;
 					inputVectorNN[9] = 0;
@@ -805,8 +809,7 @@ public class NeuralNet implements java.io.Serializable{
 				}
 				
 				
-				for(int j=0; j<NUM_INPUTS; j++)
-				{
+				for(int j=0; j<NUM_INPUTS; j++)	{
 					if(inputVectorNN[j] == 0)
 						inputVectorNN[j] = -1;
 				}
@@ -819,10 +822,8 @@ public class NeuralNet implements java.io.Serializable{
 			//findMaxOutputValue
 			int action = 0;
 			double max = -10000;
-			for(int i=0; i<numActions; i++)
-			{
-				if(outputValue[i] > max)
-				{
+			for(int i=0; i<numActions; i++)	{
+				if(outputValue[i] > max){
 					max = outputValue[i];
 					action = i;
 				}
@@ -831,8 +832,7 @@ public class NeuralNet implements java.io.Serializable{
 			return max;
 	}
 		
-		int actionOfMaxQNN(int[] state)
-		{
+		int actionOfMaxQNN(int[] state)	{
 			//outputFor
 			int inputVectorNN[] = new int[11];
 			if(state[0]==0)			//Energy
@@ -879,33 +879,27 @@ public class NeuralNet implements java.io.Serializable{
 				
 			
 			double outputValue[] = new double[numActions];		//outputvalue for every action
-			for(int i=0; i<numActions; i++)		
-			{
+			for(int i=0; i<numActions; i++)	{				
 				
-				
-				if(i==0)
-				{
+				if(i==0){
 					inputVectorNN[7] = 0;
 					inputVectorNN[8] = 0;
 					inputVectorNN[9] = 0;
 					inputVectorNN[10] = 1;
 				}
-				else if(i==1)
-				{
+				else if(i==1){
 					inputVectorNN[7] = 0;
 					inputVectorNN[8] = 0;
 					inputVectorNN[9] = 1;
 					inputVectorNN[10] = 0;
 				}
-				else if(i==2)
-				{
+				else if(i==2){
 					inputVectorNN[7] = 0;
 					inputVectorNN[8] = 1;
 					inputVectorNN[9] = 0;
 					inputVectorNN[10] = 0;
 				}
-				else
-				{
+				else{
 					inputVectorNN[7] = 1;
 					inputVectorNN[8] = 0;
 					inputVectorNN[9] = 0;
@@ -913,22 +907,19 @@ public class NeuralNet implements java.io.Serializable{
 				}
 				
 				
-				for(int j=0; j<NUM_INPUTS; j++)
-				{
+				for(int j=0; j<NUM_INPUTS; j++)	{
 					if(inputVectorNN[j] == 0)
 						inputVectorNN[j] = -1;
 				}
 				
 				outputValue[i] = outputFor(inputVectorNN);
 			}
-
-			
+	
 			
 			//findMaxOutputValue
 			int action = 0;
 			double max = -10000;
-			for(int i=0; i<numActions; i++)
-			{
+			for(int i=0; i<numActions; i++)	{
 				if(outputValue[i] > max)
 				{
 					max = outputValue[i];
@@ -1009,19 +1000,18 @@ public class NeuralNet implements java.io.Serializable{
 		    catch (IOException e)
 		    {
 		      System.out.println("IOException trying to open reader of file: " + e);
+		      //initialize();
 		    }
 		    catch (NumberFormatException e)
 		    {
+		      //initialize();
 		    }
-		    finally
-		    {
-		      try
-		      {
+		    finally {
+		      try {
 		        if (r != null)
 		          r.close();
 		      }
-		      catch (IOException e)
-		      {
+		      catch (IOException e) {
 		        System.out.println("IOException trying to close reader of file: " + e);
 		      }
 		    }
