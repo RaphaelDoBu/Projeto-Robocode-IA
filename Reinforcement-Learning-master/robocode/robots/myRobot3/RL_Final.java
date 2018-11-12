@@ -151,7 +151,7 @@ public class RL_Final extends AdvancedRobot {
 	}
 	
 	public void onScannedRobot(ScannedRobotEvent e) {
-		double firePower = Math.min(600 / e.getDistance(), 3);
+		double firePower = Math.min(500 / e.getDistance(), 3);
 //      double absbearing_rad = (getHeading()+e.getBearing())%(360);
 //      //this section sets all the information about our target
 //      double enemyX = getX()+Math.sin(absbearing_rad)*e.getDistance(); //works out the x coordinate of where the target is

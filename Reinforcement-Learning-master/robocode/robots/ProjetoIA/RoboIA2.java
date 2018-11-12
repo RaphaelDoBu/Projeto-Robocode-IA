@@ -25,8 +25,8 @@ public class RoboIA2 extends AdvancedRobot
 	  
 	  turnGunRight(-90);
 
-	  setBodyColor(new java.awt.Color(204,105,50));
-	  setGunColor(new java.awt.Color(150,70,100));
+	  setBodyColor(new java.awt.Color(24,15,50));
+	  setGunColor(new java.awt.Color(15,7,10));
 	  setRadarColor(new java.awt.Color(75,15,14));
 		
 	  while(true) {
